@@ -1,0 +1,154 @@
+<aura:component controller="HttpRestCallout" implements="force:appHostable,flexipage:availableForAllPageTypes,flexipage:availableForRecordHome,force:hasRecordId" access="global" >
+    <aura:attribute name="response" type="Map"/>
+    <aura:attribute name="listOfUser" type="List"/>
+    <aura:attribute name="userId" type="Integer"/>
+    <aura:attribute name="isModalOpen" type="boolean" default="false"/>
+    <aura:dependency resource="markup://force:showToast" type="EVENT,COMPONENT" />
+    <aura:dependency resource="markup://force:refreshView" type="EVENT,COMPONENT" />
+    
+    <div class="slds-m-around--medium">
+        <form>
+            <div class="slds-page-header" role="banner">
+                <div class="slds-media__body">
+                    <p class="slds-page-header__title slds-truncate" title="create user">Create new user</p><br/>
+                    <ui:inputText aura:id="UserName" label="New User Name"
+                                  class="slds-input"
+                                  labelClass="slds-form-element__label"
+                                  value="{!v.listOfUser.name}"
+                                  required="true"/>
+                    <ui:inputText aura:id="UserEmail" label="New User Email"
+                                  class="slds-input"
+                                  labelClass="slds-form-element__label"
+                                  value="{!v.listOfUser.email}"
+                                  required="true"/>
+                    <ui:inputText aura:id="Gender" label="Gender"
+                                  class="slds-input"
+                                  labelClass="slds-form-element__label"
+                                  value="{!v.listOfUser.gender}"
+                                  required="false"/>
+                    <ui:inputText aura:id="Status" label="Status"
+                                  class="slds-input"
+                                  labelClass="slds-form-element__label"
+                                  value="{!v.listOfUser.status}"
+                                  required="true"/>
+                    <br/>
+                    <lightning:button variant="brand" label="Create User" onclick="{!c.createUser}" />
+                </div>
+            </div>
+        </form>
+        <!--Header part-->
+        <div class="slds-page-header" role="banner">
+            <div class="slds-media__body">
+                <p class="slds-page-header__title slds-truncate" title="user details">User details By HTTP Callout</p><br/>
+                <ui:inputText aura:id="newUserId" label="User Id"
+                              class="slds-input"
+                              labelClass="slds-form-element__label"
+                              required="false"
+                              placeholder="Enter user id"/><br/>
+                <lightning:button variant="brand" label="Get User by Id" onclick="{! c.getUserById }" />
+                <lightning:button variant="brand" label="Get All Users" onclick="{! c.makeCallout }" />
+            </div>
+        </div>
+        <table class="slds-table slds-table_bordered slds-table_cell-buffer">
+            <thead>
+                <th scope="col">
+                    <div class="slds-truncate" title="Id">User Id</div>
+                </th>
+                <th scope="col">
+                    <div class="slds-truncate" title="Name">User Name</div>
+                </th>
+                <th scope="col">
+                    <div class="slds-truncate" title="Email">User Email</div>
+                </th>
+                <th scope="col">
+                    <div class="slds-truncate" title="Gender">Gender</div>
+                </th>
+                <th scope="col">
+                    <div class="slds-truncate" title="Status">Status</div>
+                </th>
+            </thead>
+            <tbody>
+                <aura:iteration items="{!v.listOfUser}" var="users">
+                    <tr>
+                        <th scope="row">
+                            <div class="slds-truncate">
+                                {!users.id}
+                            </div>
+                        </th>
+                        <th scope="row">
+                            <div class="slds-truncate">
+                                {!users.name}
+                            </div>
+                        </th>
+                        <th scope="row">
+                            <div class="slds-truncate">
+                                {!users.email}
+                            </div>
+                        </th>
+                        <th scope="row">
+                            <div class="slds-truncate">
+                                {!users.gender}
+                            </div>
+                        </th>
+                        <th scope="row">
+                            <div class="slds-truncate">
+                                {!users.status}
+                            </div>
+                        </th>
+                        <lightning:button label="Edit" onclick="{! c.openModel}" value="{!users.id}"/>
+                        <lightning:button label="Delete" value="{!users.id}" onclick="{! c.handleDelete}"/>
+                    </tr>
+                </aura:iteration>
+            </tbody>
+        </table>
+        <aura:if isTrue="{!v.isModalOpen}">
+            <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open">
+                <div class="slds-modal__container">
+                    <div class="slds-m-around--medium">
+                        <header class="slds-modal__header">
+                            <lightning:buttonIcon iconName="utility:close"
+                                                  onclick="{! c.closeModel }"
+                                                  alternativeText="close"
+                                                  variant="bare-inverse"
+                                                  class="slds-modal__close"/>
+                            <h2 id="modal-heading-01" class="slds-text-heading_medium slds-hyphenate">Update user details</h2>
+                        </header>
+                        <div class="slds-page-header" role="banner">
+                            <div class="slds-media__body">
+                                <p class="slds-page-header__title slds-truncate" title="update user"></p><br/>
+                                <ui:inputText aura:id="uName" label="User Name"
+                                              class="slds-input"
+                                              labelClass="slds-form-element__label"
+                                              required="true"/>
+                                <ui:inputText aura:id="uEmail" label="User Email"
+                                              class="slds-input"
+                                              labelClass="slds-form-element__label"
+                                              required="true"/>
+                                <ui:inputText aura:id="uGender" label="Gender"
+                                              class="slds-input"
+                                              labelClass="slds-form-element__label"
+                                              required="false"/>
+                                <ui:inputText aura:id="uStatus" label="Status"
+                                              class="slds-input"
+                                              labelClass="slds-form-element__label"
+                                              required="true"/>
+                                <br/>
+                                <lightning:button variant="neutral"
+                                                  label="Cancel"
+                                                  title="Cancel"
+                                                  onclick="{! c.closeModel }"/>
+                                <lightning:button variant="brand"
+                                                  label="Update"
+                                                  title="OK"
+                                                  onclick="{!c.submitDetails}"
+                                                  />
+                            </div>
+                        </div>
+                    </div>
+                    
+                </div>
+            </section>
+            <div class="slds-backdrop slds-backdrop_open"></div>
+        </aura:if>
+    </div>
+</aura:component>
